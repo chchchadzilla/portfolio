@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chad Keith — Developer Portfolio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --white: #f2f2f2; --accent: #e8ff00;
+      --accent2: #ff2d55; --mid: #1a1a1a; --border: #2e2e2e;
+      --mono: 'Courier New', Courier, monospace;
+      --sans: 'Arial Black', Arial, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--white); font-family: var(--sans); overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent2); }
+    .tag { display:inline-block; font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border:1px solid var(--border); background:var(--mid); color:var(--white); margin:2px 2px 2px 0; }
+    .tag.lang { border-color:var(--accent); color:var(--accent); }
+    .tag.type { border-color:var(--accent2); color:var(--accent2); }
+    body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px); pointer-events:none; z-index:9999; }
+    header { position:sticky; top:0; z-index:100; background:var(--black); border-bottom:2px solid var(--accent); display:flex; align-items:center; justify-content:space-between; padding:.9rem 2rem; }
+    .logo { font-size:1.1rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+    nav { display:flex; gap:1.4rem; }
+    nav a { font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white); font-weight:700; }
+    nav a:hover { color:var(--accent); }
+    .hero { min-height:90vh; display:grid; place-items:center; text-align:center; padding:4rem 2rem; position:relative; border-bottom:2px solid var(--border); }
+    .hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(232,255,0,.05) 0%,transparent 60%),linear-gradient(225deg,rgba(255,45,85,.05) 0%,transparent 60%); pointer-events:none; }
+    .hero-kicker { font-family:var(--mono); font-size:.85rem; letter-spacing:.25em; text-transform:uppercase; color:var(--accent); margin-bottom:1rem; }
+    .hero h1 { font-size:clamp(2.8rem,8vw,6.5rem); font-weight:900; letter-spacing:-.02em; line-height:1; text-transform:uppercase; }
+    .hero h1 span { color:var(--accent); }
+    .hero-sub { margin-top:1.5rem; max-width:640px; font-size:1.1rem; line-height:1.7; color:#aaa; }
+    .hero-cta { margin-top:2.5rem; display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+    .btn { display:inline-block; padding:.75rem 2rem; font-size:.85rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; border:2px solid var(--accent); color:var(--accent); background:transparent; cursor:pointer; transition:background .15s,color .15s; }
+    .btn:hover { background:var(--accent); color:var(--black); }
+    .btn.filled { background:var(--accent); color:var(--black); }
+    .btn.filled:hover { background:transparent; color:var(--accent); }
+    .btn.red { border-color:var(--accent2); color:var(--accent2); }
+    .btn.red:hover { background:var(--accent2); color:var(--black); }
+    section { padding:5rem 2rem; }
+    .section-label { font-family:var(--mono); font-size:.75rem; letter-spacing:.3em; text-transform:uppercase; color:var(--accent); margin-bottom:.5rem; }
+    .section-title { font-size:clamp(1.8rem,4vw,3rem); font-weight:900; text-transform:uppercase; letter-spacing:-.01em; margin-bottom:1rem; border-left:4px solid var(--accent); padding-left:1rem; }
+    .section-intro { max-width:680px; color:#aaa; font-size:.95rem; line-height:1.7; margin-bottom:3rem; padding-left:1.25rem; }
+    .projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:2px; max-width:1300px; margin:0 auto; }
+    .card { background:var(--mid); border:1px solid var(--border); padding:2rem; display:flex; flex-direction:column; gap:1rem; transition:border-color .15s,background .15s; position:relative; overflow:hidden; }
+    .card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--accent); transform:scaleY(0); transform-origin:top; transition:transform .25s; }
+    .card:hover { border-color:var(--accent); background:#141414; }
+    .card:hover::before { transform:scaleY(1); }
+    .card-type { font-family:var(--mono); font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent2); }
+    .card h3 { font-size:1.3rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
+    .card p { font-size:.9rem; color:#bbb; line-height:1.6; flex:1; }
+    .card-tags { display:flex; flex-wrap:wrap; gap:4px; }
+    .card-links { display:flex; gap:.8rem; flex-wrap:wrap; margin-top:auto; }
+    .card-link { font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); border-bottom:1px solid var(--accent); padding-bottom:1px; }
+    .card-link:hover { color:var(--accent2); border-color:var(--accent2); }
+    .card.featured { border-color:var(--accent); grid-column:span 2; }
+    .card.featured::before { transform:scaleY(1); }
+    .card.featured h3 { font-size:1.6rem; }
+    @media(max-width:720px){.card.featured{grid-column:span 1;}}
+    .sites-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:2px; max-width:1300px; margin:0 auto; }
+    .site-card { background:var(--mid); border:1px solid var(--border); padding:1.75rem; transition:border-color .15s,background .15s; position:relative; }
+    .site-card::after { content:'↗'; position:absolute; top:1.25rem; right:1.25rem; font-size:1.2rem; color:var(--border); transition:color .15s,transform .15s; }
+    .site-card:hover { border-color:var(--accent2); background:#141414; }
+    .site-card:hover::after { color:var(--accent2); transform:translate(2px,-2px); }
+    .site-card h3 { font-size:1rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-bottom:.5rem; }
+    .site-card p { font-size:.85rem; color:#999; line-height:1.5; }
+    .site-card span { display:block; margin-top:.9rem; font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; color:#666; text-transform:lowercase; }
+    .about-inner { max-width:800px; margin:0 auto; }
+    .about-inner p { color:#ccc; line-height:1.8; margin-bottom:1.2rem; font-size:.97rem; }
+    .about-inner p strong { color:var(--white); }
+    .about-inner blockquote { border-left:3px solid var(--accent); padding:.5rem 1rem; color:var(--accent); font-style:italic; font-family:var(--mono); font-size:.9rem; margin:1.5rem 0; }
+    .skills-strip { padding:3rem 2rem; border-top:1px solid var(--border); border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:.5rem; max-width:1300px; margin:0 auto; }
+    .skill-pill { font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:6px 14px; background:transparent; border:1px solid var(--border); color:#888; transition:border-color .15s,color .15s; }
+    .skill-pill:hover { border-color:var(--accent); color:var(--accent); cursor:default; }
+    footer { padding:3rem 2rem; text-align:center; border-top:2px solid var(--border); font-family:var(--mono); font-size:.75rem; letter-spacing:.1em; color:#444; }
+    footer a { color:#666; }
+    footer a:hover { color:var(--accent); }
+    .footer-links { display:flex; gap:1.5rem; justify-content:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .divider { height:2px; background:linear-gradient(90deg,var(--accent) 0%,transparent 100%); max-width:200px; margin:2rem 0; }
+    @media(max-width:600px){header{padding:.75rem 1rem;}nav{gap:.8rem;}section{padding:3rem 1rem;}}
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="logo">Chad Keith</span>
+    <nav>
+      <a href="#projects">Projects</a>
+      <a href="#sites">Sites</a>
+      <a href="#about">About</a>
+      <a href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="hero-kicker">// Full-Stack Developer &amp; AI Engineer</p>
+      <h1>I Build Things<br /><span>That Work</span></h1>
+      <p class="hero-sub">React. TypeScript. Python. LangChain. Supabase. ComfyUI. Discord bots. Real-time apps. AI systems. Websites people remember.</p>
+      <div class="hero-cta">
+        <a class="btn filled" href="#projects">See the Work</a>
+        <a class="btn red" href="#sites">Live Sites</a>
+        <a class="btn" href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="skills-strip">
+    <span class="skill-pill">React 18</span>
+    <span class="skill-pill">TypeScript</span>
+    <span class="skill-pill">Python</span>
+    <span class="skill-pill">FastAPI</span>
+    <span class="skill-pill">LangChain</span>
+    <span class="skill-pill">Supabase</span>
+    <span class="skill-pill">PostgreSQL</span>
+    <span class="skill-pill">Qdrant</span>
+    <span class="skill-pill">Next.js 15</span>
+    <span class="skill-pill">Vite</span>
+    <span class="skill-pill">Docker</span>
+    <span class="skill-pill">GitHub Actions</span>
+    <span class="skill-pill">GitHub Pages</span>
+    <span class="skill-pill">ComfyUI</span>
+    <span class="skill-pill">Discord.py</span>
+    <span class="skill-pill">OpenRouter</span>
+    <span class="skill-pill">Deepgram</span>
+    <span class="skill-pill">RAG</span>
+    <span class="skill-pill">AI Agents</span>
+    <span class="skill-pill">WebSockets</span>
+    <span class="skill-pill">REST APIs</span>
+    <span class="skill-pill">SQLite</span>
+  </div>
+
+  <section id="projects">
+    <p class="section-label">// 01 — Code Projects</p>
+    <h2 class="section-title">What I've Built</h2>
+    <p class="section-intro">Production-ready tools, real-world clients, real users. Every project below is fully shipped — not a tutorial clone.</p>
+    <div class="projects-grid">
+
+      <div class="card featured">
+        <span class="card-type">Full-Stack Web App · React · Supabase</span>
+        <h3>CookieCommand</h3>
+        <p>A complete, real-time cookie season management portal built for <strong>Girl Scout Troop 04326 (GSGLA)</strong>. Handles inventory tracking across 38 scouts and 10 cookie varieties, peer-to-peer box trades with validation, real-time troop chat (global + DMs), booth scheduling, an interactive troop calendar, auto-notifications, and a full admin panel with financial reporting — all in one mobile-friendly React SPA. Runs in dual mode: cloud sync via Supabase Realtime (WebSocket) or pure localStorage fallback. Total cost: $0.</p>
+        <div class="card-tags">
+          <span class="tag lang">React 18</span><span class="tag lang">TypeScript</span><span class="tag lang">Vite 5</span><span class="tag lang">Supabase</span><span class="tag lang">PostgreSQL</span><span class="tag lang">WebSocket</span><span class="tag type">Real-Time</span><span class="tag type">GitHub Pages</span>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="https://github.com/chchchadzilla/cookie-command" target="_blank" rel="noopener">GitHub →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-type">AI Bot · Python · Discord</span>
+        <h3>StaffLens</h3>
+        <p>Fully autonomous AI interviewer Discord bot. When an applicant joins a voice channel, StaffLens conducts a natural voice conversation (TTS output, Deepgram STT input), then delivers a comprehensive psychological assessment — communication, problem-solving, confidence, emotional regulation, cultural fit, red flags, and a STRONG HIRE → STRONG NO recommendation. Powered by Claude via OpenRouter. Accessibility-first design.</p>
+        <div class="card-tags">
+          <span class="tag lang">Python</span><span class="tag lang">Discord.py</span><span class="tag lang">Deepgram</span><span class="tag lang">OpenRouter</span><span class="tag lang">Edge-TTS</span><span class="tag lang">SQLite</span><span class="tag type">AI Agent</span><span class="tag type">Voice</span>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="https://github.com/chchchadzilla/StaffLens" target="_blank" rel="noopener">GitHub →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-type">AI Demo Stack · Python · TypeScript</span>
+        <h3>Agentic RAG Demo Toolkit</h3>
+        <p>A full LangChain + FastAPI + Next.js 15 stack launchable in minutes to demonstrate end-to-end agentic RAG workflows. Features a grounded chat UI with source citations, a real-time document ingestion console, and a deterministic loan calculator API. Docker Compose included. Built for interviews and live demos.</p>
+        <div class="card-tags">
+          <span class="tag lang">Python</span><span class="tag lang">FastAPI</span><span class="tag lang">LangChain</span><span class="tag lang">Qdrant</span><span class="tag lang">Next.js 15</span><span class="tag lang">Docker</span><span class="tag type">RAG</span><span class="tag type">AI Agent</span>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="https://github.com/chchchadzilla/Agentic-RAG-Demo-Toolkit" target="_blank" rel="noopener">GitHub →</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-type">ComfyUI Plugin · Python · AI Tooling</span>
+        <h3>ComfyUI-ChomfyNodes</h3>
+        <p>Professional custom nodes for ComfyUI generative AI workflows. Includes a 24-slot Mega Wildcard Builder, a Forensic Saver with full sidecar JSON provenance logging, a Universal Regional Noise injector compatible with Flux, SDXL, Wan 2.1 Video, and GGUF/FP8 quantizations, and a Persistent Counter for time-lapses and filename iteration.</p>
+        <div class="card-tags">
+          <span class="tag lang">Python</span><span class="tag lang">ComfyUI</span><span class="tag lang">Flux</span><span class="tag lang">SDXL</span><span class="tag type">AI Tooling</span><span class="tag type">Generative AI</span>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="https://github.com/chchchadzilla/ComfyUI-ChomfyNodes" target="_blank" rel="noopener">GitHub →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="sites" style="background:var(--mid);border-top:2px solid var(--border);border-bottom:2px solid var(--border);">
+    <p class="section-label">// 02 — Live Websites</p>
+    <h2 class="section-title">Things On the Internet</h2>
+    <p class="section-intro">Real URLs. Real traffic. Each one a different problem, a different solution.</p>
+    <div class="sites-grid">
+
+      <a href="https://mynamesucks.com" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+        <div class="site-card">
+          <h3>mynamesucks.com</h3>
+          <p>Because sometimes you need to own the joke. A site that leans into the bit — hard.</p>
+          <span>mynamesucks.com</span>
+        </div>
+      </a>
+
+      <a href="https://antiqueasy.com" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+        <div class="site-card">
+          <h3>antiqueasy.com</h3>
+          <p>Antiques, made easy. A commerce-ready destination for vintage and collectible discovery.</p>
+          <span>antiqueasy.com</span>
+        </div>
+      </a>
+
+      <a href="https://mammoth.youshouldhirechadrightnow.com" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+        <div class="site-card">
+          <h3>youshouldhirechadrightnow.com</h3>
+          <p>A domain with a message. Subtle? No. Effective? Ask the people who clicked it.</p>
+          <span>mammoth.youshouldhirechadrightnow.com</span>
+        </div>
+      </a>
+
+      <a href="https://ithinkweshouldhirethisguynamedchad.today" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+        <div class="site-card">
+          <h3>hirethisguynamedchad.today</h3>
+          <p>When you commit to a bit, you go all in. Two domains is just good redundancy.</p>
+          <span>ithinkweshouldhirethisguynamedchad.today</span>
+        </div>
+      </a>
+
+      <a href="https://sixtymin.site" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+        <div class="site-card">
+          <h3>sixtymin.site</h3>
+          <p>Sixty minutes. One idea. A focused web experience built with urgency in mind.</p>
+          <span>sixtymin.site</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section id="about">
+    <p class="section-label">// 03 — About</p>
+    <h2 class="section-title">The Narrative</h2>
+    <div class="about-inner">
+      <blockquote>"Ship it. Then make it better."</blockquote>
+      <p>I'm <strong>Chad Keith</strong> — a full-stack developer and AI engineer who builds things people actually use. My work spans the full stack: React SPAs with Supabase real-time backends, FastAPI services with LangChain agents, Discord bots that literally speak to users and produce psychological assessments, ComfyUI tooling used by generative-AI artists, and websites with domain names that state the obvious.</p>
+      <p><strong>CookieCommand</strong> started as a favour for a Girl Scout troop and turned into a full production app — 38 scouts, real-time inventory sync, troop chat, booth scheduling, and a financial dashboard that tracks every dollar across the cookie season. Zero ongoing cost.</p>
+      <p><strong>StaffLens</strong> solves a real problem: community managers need to vet applicants but hate the process. The bot joins a Discord voice channel, has a real conversation, and delivers a structured hire/no-hire report — all without a human ever sitting in.</p>
+      <p>The <strong>Agentic RAG Demo Toolkit</strong> is proof-of-concept made deployable: a full LangChain + FastAPI + Next.js stack that demonstrates grounded chat, live document ingestion, and deterministic tooling — documented well enough to run in an interview in minutes.</p>
+      <p><strong>ComfyUI-ChomfyNodes</strong> grew out of frustration with the limits of off-the-shelf nodes. 24-slot wildcard prompting, forensic image provenance, universal noise injection across every major model architecture.</p>
+      <div class="divider"></div>
+      <p>I believe in <strong>sharp edges</strong>: clear APIs, obvious interfaces, code that does exactly what the name says. Things should be precise, honest, and direct.</p>
+      <p>If you need someone who can go from idea to deployed app — and explain every decision along the way — let's talk.</p>
+      <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <a class="btn filled" href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://mynamesucks.com" target="_blank" rel="noopener">mynamesucks.com</a>
+      <a href="https://antiqueasy.com" target="_blank" rel="noopener">antiqueasy.com</a>
+      <a href="https://sixtymin.site" target="_blank" rel="noopener">sixtymin.site</a>
+    </div>
+    <p>© 2026 Chad Keith. All Rights Reserved.</p>
+    <p style="margin-top:.4rem;font-size:.65rem;color:#333;">Built with 0 frameworks, 0 dependencies, and 100% intent.</p>
+  </footer>
+
+</body>
+</html>
