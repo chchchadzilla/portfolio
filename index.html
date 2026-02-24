@@ -1,17 +1,498 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Your Portfolio</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chad Keith — Developer & AI Engineer</title>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+  <!-- D3 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f7f6f3;
+      --surface:  #ffffff;
+      --ink:      #111111;
+      --ink2:     #555555;
+      --ink3:     #999999;
+      --accent:   #1a1a1a;
+      --gold:     #c9a84c;
+      --line:     #e2e0db;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.06);
+      --shadow-md: 0 8px 32px rgba(0,0,0,.10);
+      --shadow-lg: 0 24px 64px rgba(0,0,0,.14);
+      --mono: 'Courier New', Courier, monospace;
+      --serif: Georgia, 'Times New Roman', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.6; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: var(--ink); color: var(--bg); }
+
+    /* CURSOR */
+    .cursor { position:fixed; width:10px; height:10px; background:var(--ink); border-radius:50%; pointer-events:none; z-index:10000; transform:translate(-50%,-50%); mix-blend-mode:multiply; }
+    .cursor-ring { position:fixed; width:36px; height:36px; border:1.5px solid var(--ink); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); opacity:.5; transition:width .2s ease, height .2s ease, opacity .2s ease; }
+    body.hovering .cursor-ring { width:52px; height:52px; opacity:1; }
+
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:500; display:flex; align-items:center; justify-content:space-between; padding:1.4rem 3rem; background:rgba(247,246,243,.88); backdrop-filter:blur(14px); border-bottom:1px solid transparent; transition:border-color .3s; }
+    nav.scrolled { border-bottom-color:var(--line); }
+    .nav-logo { font-size:.78rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); }
+    .nav-links { display:flex; gap:2.5rem; list-style:none; }
+    .nav-links a { font-size:.72rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); position:relative; transition:color .2s; }
+    .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1px; background:var(--ink); transition:width .25s ease; }
+    .nav-links a:hover { color:var(--ink); }
+    .nav-links a:hover::after { width:100%; }
+
+    /* HERO */
+    .hero { min-height:100vh; display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:4rem; padding:8rem 3rem 5rem; max-width:1280px; margin:0 auto; }
+    .hero-eyebrow { font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink3); margin-bottom:1.6rem; opacity:0; }
+    .hero-name { font-size:clamp(3rem,5.5vw,5.5rem); font-weight:800; line-height:1.0; letter-spacing:-.03em; color:var(--ink); opacity:0; }
+    .hero-title { margin-top:1.2rem; font-size:clamp(1rem,1.6vw,1.3rem); font-weight:400; color:var(--ink2); line-height:1.5; opacity:0; }
+    .hero-title em { font-style:normal; font-weight:600; color:var(--ink); }
+    .hero-cta { margin-top:2.8rem; display:flex; gap:1rem; flex-wrap:wrap; opacity:0; }
+
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.75rem 1.75rem; font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; border:1.5px solid var(--ink); color:var(--ink); background:transparent; cursor:pointer; transition:background .18s, color .18s, transform .18s, box-shadow .18s; will-change:transform; }
+    .btn:hover { background:var(--ink); color:var(--bg); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .btn.filled { background:var(--ink); color:var(--bg); }
+    .btn.filled:hover { background:transparent; color:var(--ink); transform:translateY(-2px); }
+    .btn.gold { border-color:var(--gold); color:var(--gold); }
+    .btn.gold:hover { background:var(--gold); color:#fff; }
+
+    /* HEADSHOT */
+    .hero-right { display:flex; justify-content:center; align-items:center; position:relative; opacity:0; }
+    .headshot-wrap { position:relative; width:380px; height:460px; cursor:none; }
+    .headshot-bg { position:absolute; inset:0; background:var(--line); transform:translate(14px,14px); transition:transform .3s ease; z-index:0; }
+    .headshot-wrap:hover .headshot-bg { transform:translate(20px,20px); }
+    .headshot-img { position:relative; z-index:1; width:100%; height:100%; object-fit:cover; object-position:top center; display:block; filter:grayscale(20%); transition:filter .3s; }
+    .headshot-wrap:hover .headshot-img { filter:grayscale(0%); }
+    .headshot-badge { position:absolute; bottom:-18px; right:-18px; z-index:2; background:var(--surface); border:1px solid var(--line); padding:.9rem 1.2rem; box-shadow:var(--shadow-md); opacity:0; transform:translateY(10px); }
+    .headshot-badge .badge-num { display:block; font-size:1.6rem; font-weight:800; letter-spacing:-.03em; line-height:1; color:var(--ink); }
+    .headshot-badge .badge-label { display:block; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-top:.25rem; }
+
+    /* D3 CANVAS */
+    #particle-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:-1; opacity:.25; }
+
+    /* DIVIDER */
+    .divider { width:100%; height:1px; background:var(--line); max-width:1280px; margin:0 auto; }
+
+    /* SECTION CHROME */
+    .section { padding:6rem 3rem; max-width:1280px; margin:0 auto; }
+    .section-eyebrow { font-family:var(--mono); font-size:.68rem; letter-spacing:.26em; text-transform:uppercase; color:var(--ink3); margin-bottom:.8rem; }
+    .section-heading { font-size:clamp(1.8rem,3.5vw,3rem); font-weight:800; letter-spacing:-.03em; line-height:1.1; color:var(--ink); margin-bottom:1rem; }
+    .section-sub { font-size:1rem; color:var(--ink2); max-width:580px; line-height:1.7; margin-bottom:3.5rem; }
+
+    /* TICKER */
+    .ticker-wrap { overflow:hidden; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:1rem 0; background:var(--surface); user-select:none; }
+    .ticker-track { display:flex; gap:3rem; width:max-content; animation:ticker 28s linear infinite; }
+    .ticker-track:hover { animation-play-state:paused; }
+    .ticker-item { font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); white-space:nowrap; display:flex; align-items:center; gap:.8rem; }
+    .ticker-item::before { content:'◆'; font-size:.45rem; color:var(--gold); }
+    @keyframes ticker { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+
+    /* PROJECTS GRID */
+    .projects-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:1.5rem; }
+    .card { background:var(--surface); border:1px solid var(--line); padding:2.2rem; display:flex; flex-direction:column; gap:.9rem; cursor:none; position:relative; transition:box-shadow .3s ease; transform-style:preserve-3d; will-change:transform; overflow:hidden; }
+    .card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--gold),transparent); opacity:0; transition:opacity .3s; }
+    .card:hover { box-shadow:var(--shadow-lg); }
+    .card:hover::before { opacity:1; }
+    .card::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.0) 40%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.0) 60%); transform:translateX(-100%); pointer-events:none; }
+    .card:hover::after { animation:shimmer .6s ease forwards; }
+    @keyframes shimmer { to { transform:translateX(100%); } }
+    .card-span-8 { grid-column:span 8; }
+    .card-span-4 { grid-column:span 4; }
+    .card-span-6 { grid-column:span 6; }
+    .card-span-12 { grid-column:span 12; }
+    @media(max-width:900px) { .card-span-8,.card-span-4,.card-span-6 { grid-column:span 12; } }
+    .card-eyebrow { font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink3); }
+    .card-title { font-size:1.25rem; font-weight:700; letter-spacing:-.02em; color:var(--ink); line-height:1.2; }
+    .card-desc { font-size:.88rem; color:var(--ink2); line-height:1.65; flex:1; }
+    .card-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:.3rem; }
+    .tag { font-family:var(--mono); font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:3px 10px; border:1px solid var(--line); color:var(--ink3); background:var(--bg); transition:border-color .2s, color .2s; }
+    .card:hover .tag { border-color:var(--ink); color:var(--ink); }
+    .card-link { display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); border-bottom:1px solid var(--ink); padding-bottom:1px; width:fit-content; transition:gap .2s; margin-top:auto; }
+    .card-link:hover { gap:.8rem; }
+    .card-link .arrow { transition:transform .2s; }
+    .card-link:hover .arrow { transform:translateX(4px); }
+    .card.featured { border-left:3px solid var(--gold); }
+
+    /* SITES */
+    .sites-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.5rem; }
+    .site-card { background:var(--surface); border:1px solid var(--line); padding:1.75rem; position:relative; cursor:none; transition:box-shadow .3s; overflow:hidden; will-change:transform; }
+    .site-card:hover { box-shadow:var(--shadow-lg); }
+    .site-card-arrow { position:absolute; top:1.2rem; right:1.2rem; font-size:1rem; color:var(--line); transition:color .2s, transform .2s; }
+    .site-card:hover .site-card-arrow { color:var(--ink); transform:translate(3px,-3px); }
+    .site-card h3 { font-size:.9rem; font-weight:700; letter-spacing:-.01em; color:var(--ink); margin-bottom:.4rem; }
+    .site-card p { font-size:.82rem; color:var(--ink2); line-height:1.55; }
+    .site-card-url { display:block; margin-top:.8rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; color:var(--ink3); }
+
+    /* ABOUT */
+    .about-grid { display:grid; grid-template-columns:1fr 1.6fr; gap:5rem; align-items:start; }
+    @media(max-width:860px) { .about-grid { grid-template-columns:1fr; gap:3rem; } .hero { grid-template-columns:1fr; } .hero-right { display:none; } }
+    .about-sticky { position:sticky; top:6rem; }
+    .about-name { font-size:2.5rem; font-weight:800; letter-spacing:-.04em; line-height:1; margin-bottom:1rem; }
+    .about-role { font-size:.8rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-bottom:2rem; }
+    .about-stat { display:flex; align-items:baseline; gap:.6rem; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--line); }
+    .stat-num { font-size:1.8rem; font-weight:800; letter-spacing:-.04em; color:var(--ink); }
+    .stat-label { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); }
+    .about-body p { font-size:.97rem; color:var(--ink2); line-height:1.8; margin-bottom:1.3rem; }
+    .about-body p strong { color:var(--ink); font-weight:600; }
+    .about-body blockquote { border-left:2px solid var(--gold); padding:.5rem 0 .5rem 1.2rem; font-style:italic; color:var(--ink); font-size:1.05rem; margin:1.5rem 0 2rem; font-family:var(--serif); }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--line); padding:3rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; background:var(--surface); }
+    .footer-left { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); }
+    .footer-links { display:flex; gap:2rem; list-style:none; flex-wrap:wrap; }
+    .footer-links a { font-size:.72rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); transition:color .2s; }
+    .footer-links a:hover { color:var(--ink); }
+
+    /* MISC */
+    .reveal { opacity:0; transform:translateY(28px); }
+    .gold-line { display:inline-block; width:32px; height:2px; background:var(--gold); vertical-align:middle; margin-right:.8rem; }
+
+    /* NOISE */
+    body::before { content:''; position:fixed; inset:0; opacity:.022; pointer-events:none; z-index:9998; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:200px 200px; }
+
+    /* LOADER */
+    #loader { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.8rem; }
+    .loader-name { font-size:1rem; font-weight:700; letter-spacing:.3em; text-transform:uppercase; color:var(--ink); }
+    .loader-bar-wrap { width:160px; height:1px; background:var(--line); position:relative; overflow:hidden; }
+    .loader-bar { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--ink); }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Portfolio</h1>
-    </header>
-    <div>
-        <img class="headshot-img" src="https://github.com/chchchadzilla.png" alt="Chad Keith" />
+
+<div id="loader">
+  <span class="loader-name">Chad Keith</span>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<svg id="particle-canvas"></svg>
+
+<nav id="nav">
+  <span class="nav-logo">Chad Keith</span>
+  <ul class="nav-links">
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#sites">Sites</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-left">
+    <p class="hero-eyebrow"><span class="gold-line"></span>Full-Stack · AI · Builder</p>
+    <h1 class="hero-name">Chad<br />Keith.</h1>
+    <p class="hero-title">Developer &amp; AI Engineer.<br />
+      I build <em>real things</em> — production apps, voice AI bots,<br />
+      RAG systems, generative tooling, and websites people remember.
+    </p>
+    <div class="hero-cta">
+      <a class="btn filled" href="#projects">See the Work</a>
+      <a class="btn" href="#about">About Me</a>
+      <a class="btn gold" href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
-    <!-- Additional content here -->
+  </div>
+  <div class="hero-right">
+    <div class="headshot-wrap" id="headshot-wrap">
+      <div class="headshot-bg"></div>
+      <img class="headshot-img" src="https://mynamesucks.com/headshot.jpg" alt="Chad Keith" onerror="this.onerror=null;this.src='https://mynamesucks.com/chad.jpg';" />
+      <div class="headshot-badge" id="headshot-badge">
+        <span class="badge-num">5+</span>
+        <span class="badge-label">Shipped Projects</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="projects">
+  <p class="section-eyebrow">01 — Selected Work</p>
+  <h2 class="section-heading">What I've Built</h2>
+  <p class="section-sub">Production-ready. Real users. Real problems solved. Not a tutorial clone in the bunch.</p>
+  <div class="projects-grid">
+
+    <div class="card card-span-8 featured reveal">
+      <span class="card-eyebrow">AI Platform · Personality Intelligence · SaaS</span>
+      <h3 class="card-title">ConversaTrait</h3>
+      <p class="card-desc">Augmented intelligence platform that performs <strong>Big 5 personality analysis</strong> through natural conversation — no surveys, no forms, no tests. ConversaTrait reads between the lines of how someone speaks to surface deep psychological profiles: openness, conscientiousness, extraversion, agreeableness, and emotional stability. Used by hiring teams, coaches, and community managers who need to understand the people in front of them without ever asking directly.</p>
+      <div class="card-tags">
+        <span class="tag">Big 5 Personality</span><span class="tag">NLP</span><span class="tag">AI Analysis</span><span class="tag">SaaS</span><span class="tag">Augmented Intelligence</span>
+      </div>
+      <a class="card-link" href="https://conversatrait.com" target="_blank" rel="noopener">Visit ConversaTrait <span class="arrow">→</span></a>
+    </div>
+
+    <div class="card card-span-4 reveal">
+      <span class="card-eyebrow">AI Bot · Python · Discord</span>
+      <h3 class="card-title">StaffLens</h3>
+      <p class="card-desc">Autonomous AI voice interviewer for Discord. Joins a channel, conducts a real conversation, and delivers a full psychological hire/no-hire report. Deepgram STT + Edge-TTS + Claude via OpenRouter.</p>
+      <div class="card-tags">
+        <span class="tag">Python</span><span class="tag">Deepgram</span><span class="tag">Voice AI</span><span class="tag">OpenRouter</span>
+      </div>
+      <a class="card-link" href="https://github.com/chchchadzilla/StaffLens" target="_blank" rel="noopener">GitHub <span class="arrow">→</span></a>
+    </div>
+
+    <div class="card card-span-6 reveal">
+      <span class="card-eyebrow">Full-Stack Web App · React · Supabase</span>
+      <h3 class="card-title">CookieCommand</h3>
+      <p class="card-desc">Real-time cookie season management portal for Girl Scout Troop 04326. 38 scouts, 10 cookie types, peer-to-peer trades, live chat, booth scheduling, calendar, financial reporting. Supabase Realtime + localStorage fallback. Total cost: $0.</p>
+      <div class="card-tags">
+        <span class="tag">React 18</span><span class="tag">TypeScript</span><span class="tag">Supabase</span><span class="tag">Real-Time</span>
+      </div>
+      <a class="card-link" href="https://github.com/chchchadzilla/cookie-command" target="_blank" rel="noopener">GitHub <span class="arrow">→</span></a>
+    </div>
+
+    <div class="card card-span-6 reveal">
+      <span class="card-eyebrow">AI Demo Stack · Python · TypeScript</span>
+      <h3 class="card-title">Agentic RAG Demo Toolkit</h3>
+      <p class="card-desc">Full LangChain + FastAPI + Next.js 15 stack for demonstrating agentic RAG workflows. Grounded chat with source citations, live document ingestion, deterministic tooling. Docker Compose included. Runs in an interview in five minutes.</p>
+      <div class="card-tags">
+        <span class="tag">LangChain</span><span class="tag">FastAPI</span><span class="tag">Qdrant</span><span class="tag">Next.js 15</span>
+      </div>
+      <a class="card-link" href="https://github.com/chchchadzilla/Agentic-RAG-Demo-Toolkit" target="_blank" rel="noopener">GitHub <span class="arrow">→</span></a>
+    </div>
+
+    <div class="card card-span-12 reveal">
+      <span class="card-eyebrow">ComfyUI Plugin · Python · Generative AI</span>
+      <h3 class="card-title">ComfyUI-ChomfyNodes</h3>
+      <p class="card-desc">Professional custom node suite for ComfyUI. 24-slot Mega Wildcard Builder. Forensic Saver with full sidecar JSON provenance logging. Universal Regional Noise injector compatible with Flux 16ch, SDXL 4ch, Wan 2.1 Video, and GGUF/FP8 quantizations. Persistent Counter for time-lapses and filename iteration.</p>
+      <div class="card-tags">
+        <span class="tag">Python</span><span class="tag">ComfyUI</span><span class="tag">Flux</span><span class="tag">SDXL</span><span class="tag">Generative AI</span>
+      </div>
+      <a class="card-link" href="https://github.com/chchchadzilla/ComfyUI-ChomfyNodes" target="_blank" rel="noopener">GitHub <span class="arrow">→</span></a>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="sites" style="background:var(--surface);">
+  <p class="section-eyebrow">02 — Live on the Internet</p>
+  <h2 class="section-heading">Sites I Own</h2>
+  <p class="section-sub">Real domains. Real traffic. Each one a different statement.</p>
+  <div class="sites-grid">
+    <a href="https://mynamesucks.com" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>mynamesucks.com</h3><p>Owning the joke, completely. A site that commits to the bit as hard as the domain does.</p><span class="site-card-url">mynamesucks.com</span></div></a>
+    <a href="https://conversatrait.com" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>conversatrait.com</h3><p>Augmented intelligence platform — Big 5 personality analysis through natural conversation. No surveys.</p><span class="site-card-url">conversatrait.com</span></div></a>
+    <a href="https://antiqueasy.com" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>antiqueasy.com</h3><p>Antiques, made easy. A clean, commerce-ready destination for vintage and collectible discovery.</p><span class="site-card-url">antiqueasy.com</span></div></a>
+    <a href="https://mammoth.youshouldhirechadrightnow.com" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>youshouldhirechadrightnow.com</h3><p>A domain with a thesis. Subtle? No. Effective? Ask the people who clicked it.</p><span class="site-card-url">youshouldhirechadrightnow.com</span></div></a>
+    <a href="https://ithinkweshouldhirethisguynamedchad.today" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>hirethisguynamedchad.today</h3><p>Two domains is redundancy. Redundancy is resilience.</p><span class="site-card-url">hirethisguynamedchad.today</span></div></a>
+    <a href="https://sixtymin.site" target="_blank" rel="noopener" style="display:block;color:inherit;"><div class="site-card reveal"><span class="site-card-arrow">↗</span><h3>sixtymin.site</h3><p>Sixty minutes. One idea. A focused web experience built with urgency in mind.</p><span class="site-card-url">sixtymin.site</span></div></a>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section" id="about">
+  <p class="section-eyebrow">03 — The Person</p>
+  <h2 class="section-heading">About</h2>
+  <div class="about-grid">
+    <div class="about-sticky reveal">
+      <p class="about-name">Chad<br/>Keith.</p>
+      <p class="about-role"><span class="gold-line"></span>Developer · AI Engineer · Builder</p>
+      <div class="about-stat"><span class="stat-num" data-target="5">0</span><span class="stat-label">Shipped Projects</span></div>
+      <div class="about-stat"><span class="stat-num" data-target="6">0</span><span class="stat-label">Live Domains</span></div>
+      <div class="about-stat"><span class="stat-num" data-target="38">0</span><span class="stat-label">Scouts on CookieCommand</span></div>
+      <svg id="skills-chart" style="width:100%;margin-top:2rem;"></svg>
+    </div>
+    <div class="about-body reveal">
+      <blockquote>"Ship it. Then make it better."</blockquote>
+      <p>I'm <strong>Chad Keith</strong> — a full-stack developer and AI engineer who builds things people actually use. React SPAs, FastAPI services, LangChain agents, Discord bots that literally speak to users, ComfyUI tooling, and websites with domain names that state the obvious.</p>
+      <p><strong>ConversaTrait</strong> is my flagship product: an augmented intelligence platform that performs Big 5 personality analysis through natural conversation — no questionnaires, no forced prompts. It reads how people communicate and surfaces psychological traits underneath. Used by hiring teams, coaches, and community managers.</p>
+      <p><strong>CookieCommand</strong> started as a favour for a Girl Scout troop and became a full production app — 38 scouts, real-time Supabase sync, troop chat, booth scheduling, peer-to-peer box trades, and a financial dashboard. Deployed on GitHub Pages. Total cost: zero.</p>
+      <p><strong>StaffLens</strong> solves a real problem: community managers hate sitting through applicant voice calls. The bot joins the Discord channel, has a real conversation, and delivers a structured hire/no-hire report. Deepgram STT, Edge-TTS, Claude via OpenRouter.</p>
+      <p>I believe in <strong>sharp edges</strong>: clear APIs, honest interfaces, code that does exactly what the name says.</p>
+      <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <a class="btn filled" href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn gold" href="https://conversatrait.com" target="_blank" rel="noopener">ConversaTrait ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-left">© 2026 Chad Keith · All Rights Reserved</p>
+  <ul class="footer-links">
+    <li><a href="https://github.com/chchchadzilla" target="_blank" rel="noopener">GitHub</a></li>
+    <li><a href="https://conversatrait.com" target="_blank" rel="noopener">ConversaTrait</a></li>
+    <li><a href="https://mynamesucks.com" target="_blank" rel="noopener">mynamesucks.com</a></li>
+    <li><a href="https://antiqueasy.com" target="_blank" rel="noopener">antiqueasy.com</a></li>
+    <li><a href="https://sixtymin.site" target="_blank" rel="noopener">sixtymin.site</a></li>
+  </ul>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger, CustomEase);
+CustomEase.create("smooth","M0,0 C0.25,0.1 0.25,1 1,1");
+
+/* LOADER */
+const loaderBar = document.getElementById('loader-bar');
+const loader = document.getElementById('loader');
+gsap.to(loaderBar, {
+  width:'100%', duration:1.1, ease:'power2.inOut',
+  onComplete:() => {
+    gsap.to(loader,{ opacity:0, duration:.5, ease:'power1.out',
+      onComplete:()=>{ loader.style.display='none'; initAnimations(); }});
+  }
+});
+
+/* CURSOR */
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mouseX=0,mouseY=0,ringX=0,ringY=0;
+document.addEventListener('mousemove',e=>{ mouseX=e.clientX; mouseY=e.clientY; gsap.to(cursor,{x:mouseX,y:mouseY,duration:.08,ease:'none'}); });
+(function animateRing(){ ringX+=(mouseX-ringX)*.12; ringY+=(mouseY-ringY)*.12; cursorRing.style.left=ringX+'px'; cursorRing.style.top=ringY+'px'; requestAnimationFrame(animateRing); })();
+document.querySelectorAll('a,button,.card,.site-card,.btn').forEach(el=>{ el.addEventListener('mouseenter',()=>document.body.classList.add('hovering')); el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering')); });
+
+/* D3 PARTICLES */
+(function(){
+  const svg=d3.select('#particle-canvas').attr('width',window.innerWidth).attr('height',window.innerHeight);
+  const nodes=d3.range(60).map(()=>({ x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight, r:Math.random()*1.6+.3, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25 }));
+  const circles=svg.selectAll('circle').data(nodes).enter().append('circle').attr('r',d=>d.r).attr('fill','#1a1a1a').attr('cx',d=>d.x).attr('cy',d=>d.y);
+  function tick(){ nodes.forEach(n=>{ n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>window.innerWidth) n.vx*=-1; if(n.y<0||n.y>window.innerHeight) n.vy*=-1; }); circles.attr('cx',d=>d.x).attr('cy',d=>d.y); requestAnimationFrame(tick); }
+tick();
+  window.addEventListener('resize',()=>svg.attr('width',window.innerWidth).attr('height',window.innerHeight));
+})();
+
+/* TICKER */
+(function(){
+  const skills=['React 18','TypeScript','Python','FastAPI','LangChain','Supabase','PostgreSQL','Qdrant','Next.js 15','Vite 5','Docker','GitHub Actions','ComfyUI','Discord.py','OpenRouter','Deepgram','Edge-TTS','RAG','AI Agents','WebSockets','REST APIs','SQLite','Big 5 Personality AI','GSAP','D3.js','Node.js'];
+  const track=document.getElementById('ticker');
+  [...skills,...skills].forEach(s=>{ const span=document.createElement('span'); span.className='ticker-item'; span.textContent=s; track.appendChild(span); });
+})();
+
+function initAnimations(){
+  /* Hero */
+  const tl=gsap.timeline({defaults:{ease:'smooth'}});
+  tl.to('.hero-eyebrow',{opacity:1,y:0,duration:.7},.1)
+    .to('.hero-name',{opacity:1,y:0,duration:.9},.25)
+    .to('.hero-title',{opacity:1,y:0,duration:.8},.45)
+    .to('.hero-cta',{opacity:1,y:0,duration:.7},.6)
+    .to('.hero-right',{opacity:1,duration:.9},.5)
+    .to('#headshot-badge',{opacity:1,y:0,duration:.6},1.0);
+
+  /* Nav scroll */
+  const nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40));
+
+  /* Scroll reveal */
+  document.querySelectorAll('.reveal').forEach(el=>{
+    gsap.to(el,{ scrollTrigger:{ trigger:el, start:'top 88%', toggleActions:'play none none none' }, opacity:1, y:0, duration:.75, ease:'smooth' });
+  });
+
+  /* Card 3D tilt + lift */
+  document.querySelectorAll('.card,.site-card').forEach(card=>{
+    const str=card.classList.contains('card')?10:8;
+    card.addEventListener('mousemove',e=>{
+      const rect=card.getBoundingClientRect();
+      const dx=(e.clientX-rect.left-rect.width/2)/(rect.width/2);
+      const dy=(e.clientY-rect.top-rect.height/2)/(rect.height/2);
+      gsap.to(card,{rotateX:-dy*str,rotateY:dx*str,translateZ:24,scale:1.015,duration:.35,ease:'power2.out',transformPerspective:900});
+    });
+    card.addEventListener('mouseleave',()=>{
+      gsap.to(card,{rotateX:0,rotateY:0,translateZ:0,scale:1,duration:.55,ease:'elastic.out(1,.75)'});
+    });
+    card.addEventListener('click',()=>{
+      gsap.fromTo(card,{x:0},{x:6,duration:.07,ease:'power1.inOut',yoyo:true,repeat:5,onComplete:()=>gsap.set(card,{x:0})});
+    });
+  });
+
+  /* Headshot tilt */
+  const hw=document.getElementById('headshot-wrap');
+  if(hw){
+    hw.addEventListener('mousemove',e=>{
+      const rect=hw.getBoundingClientRect();
+      const dx=(e.clientX-rect.left-rect.width/2)/(rect.width/2);
+      const dy=(e.clientY-rect.top-rect.height/2)/(rect.height/2);
+      gsap.to(hw,{rotateY:dx*12,rotateX:-dy*10,scale:1.02,duration:.4,ease:'power2.out',transformPerspective:1000});
+    });
+    hw.addEventListener('mouseleave',()=>gsap.to(hw,{rotateX:0,rotateY:0,scale:1,duration:.7,ease:'elastic.out(1,.6)'}));
+  }
+
+  /* Magnetic buttons */
+  document.querySelectorAll('.btn').forEach(btn=>{
+    btn.addEventListener('mousemove',e=>{
+      const rect=btn.getBoundingClientRect();
+      const dx=(e.clientX-rect.left-rect.width/2)*.25;
+      const dy=(e.clientY-rect.top-rect.height/2)*.25;
+      gsap.to(btn,{x:dx,y:dy,duration:.25,ease:'power2.out'});
+    });
+    btn.addEventListener('mouseleave',()=>gsap.to(btn,{x:0,y:0,duration:.6,ease:'elastic.out(1,.7)}));
+  });
+
+  /* D3 Skills bar chart */
+  (function(){
+    const data=[
+      {label:'React / TS',val:95},{label:'Python',val:90},{label:'AI / LangChain',val:88},
+      {label:'Supabase',val:85},{label:'ComfyUI',val:80},{label:'Discord Bots',val:82}
+    ];
+    const W=320,H=data.length*38+10;
+    const svg=d3.select('#skills-chart').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%');
+    const x=d3.scaleLinear().domain([0,100]).range([0,W-80]);
+    const y=d3.scaleBand().domain(data.map(d=>d.label)).range([0,H]).padding(.32);
+    svg.selectAll('.bg-bar').data(data).enter().append('rect').attr('class','bg-bar')
+      .attr('x',0).attr('y',d=>y(d.label)).attr('width',W-80).attr('height',y.bandwidth()).attr('fill','#e2e0db');
+    const fgBars=svg.selectAll('.fg-bar').data(data).enter().append('rect').attr('class','fg-bar')
+      .attr('x',0).attr('y',d=>y(d.label)).attr('width',0).attr('height',y.bandwidth()).attr('fill','#1a1a1a');
+    svg.selectAll('.bar-val').data(data).enter().append('text').attr('class','bar-val')
+      .attr('x',W-75).attr('y',d=>y(d.label)+y.bandwidth()/2+4).attr('font-size','9')
+      .attr('font-family','Courier New,monospace').attr('fill','#999').attr('text-anchor','start').text(d=>d.val+'%');
+    svg.selectAll('.bar-lbl').data(data).enter().append('text').attr('class','bar-lbl')
+      .attr('x',-4).attr('y',d=>y(d.label)+y.bandwidth()/2+4).attr('font-size','8')
+      .attr('font-family','Courier New,monospace').attr('fill','#bbb').attr('text-anchor','end').text(d=>d.label.substring(0,6));
+    ScrollTrigger.create({ trigger:'#skills-chart', start:'top 80%', once:true,
+      onEnter:()=>fgBars.transition().duration(900).delay((_,i)=>i*90).ease(d3.easeCubicOut).attr('width',d=>x(d.val)) });
+  })();
+
+  /* Counters */
+  document.querySelectorAll('.stat-num[data-target]').forEach(el=>{
+    const target=parseInt(el.dataset.target);
+    ScrollTrigger.create({ trigger:el, start:'top 85%', once:true,
+      onEnter:()=>gsap.to({val:0},{val:target,duration:1.4,ease:'power2.out',
+        onUpdate:function(){ el.textContent=Math.round(this.targets()[0].val); }});
+    });
+  });
+
+  /* Section heading gold underline */
+  document.querySelectorAll('.section-heading').forEach(h=>{
+    const text=h.textContent; h.innerHTML='';
+    const span=document.createElement('span');
+    span.style.cssText='position:relative;display:inline-block;';
+    span.textContent=text;
+    const line=document.createElement('span');
+    line.style.cssText='position:absolute;bottom:-4px;left:0;height:2px;width:0;background:var(--gold);transition:width .7s cubic-bezier(.25,1,.5,1);';
+    span.appendChild(line); h.appendChild(span);
+    ScrollTrigger.create({ trigger:h, start:'top 85%', once:true, onEnter:()=>{ line.style.width='100%'; } });
+  });
+
+  /* Stagger site cards */
+  gsap.utils.toArray('.site-card').forEach((card,i)=>{
+    gsap.fromTo(card,{opacity:0,y:30},{
+      scrollTrigger:{trigger:card,start:'top 90%',once:true},
+      opacity:1,y:0,duration:.65,delay:i*.08,ease:'smooth'
+    });
+  });
+}
+</script>
 </body>
 </html>
